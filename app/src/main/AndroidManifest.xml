@@ -38,10 +38,10 @@
       />
 
     <service
-      android:name="com.tencent.smtt.export.external.DexClassLoaderProviderService"
-      android:label="dexopt"
-      android:process=":dexopt"
-      ></service>
+        android:name="com.tencent.smtt.export.external.DexClassLoaderProviderService"
+        android:label="dexopt"
+        android:process=":dexopt" />
+
     <provider
       android:name="com.tencent.smtt.utils.FileProvider"
       android:authorities="${applicationId}.provider"

@@ -6,15 +6,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import com.tencent.smtt.sdk.QbSdk;
 import com.tencent.smtt.sdk.ValueCallback;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
   private TextView mTv;
   private TextView mTv2;
   private TextView mTv3;
   private TextView mTv4;
+  private TextView tvInfo;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -22,25 +31,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     setContentView(R.layout.activity_main);
     initView();
     FileUtils.createDocumentsFile(this);
+    loadInfo();
   }
 
   private void initView() {
+    tvInfo = findViewById(R.id.tvInfo);
     mTv = (TextView) findViewById(R.id.tv5);
     mTv.setOnClickListener(this);
     mTv2 = (TextView) findViewById(R.id.tv2);
     mTv2.setOnClickListener(this);
     mTv3 = (TextView) findViewById(R.id.tv3);
     mTv3.setOnClickListener(this);
-    mTv4 = (TextView) findViewById(R.id.tv4);
+    mTv4 = (TextView) findViewById(R.id.tvOpenInApp);
     mTv4.setOnClickListener(this);
+
+    findViewById(R.id.btCopyAsset).setOnClickListener(v -> {
+      try {
+        InputStream in = getAssets().open("111.docx");
+        FileOutputStream out = new FileOutputStream(getDestFIle());
+        byte[] buffer = new byte[1024];
+        int lengthRead;
+        while ((lengthRead = in.read(buffer)) > 0) {
+          out.write(buffer, 0, lengthRead);
+          out.flush();
+        }
+        in.close();
+        out.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @Override
   public void onClick(View v) {
     switch (v.getId()) {
-      case R.id.tv4:
+      case R.id.tvOpenInApp:
         // 传入的地址不对可能会导致报错，还有一点很重要，如果内核没有初始化完成，不能调用，否则不能使用。
-        PreviewAttachmentActivity.start(this, "在这里传入文件的地址，如果/storage/emulated/0/Download等");
+        PreviewAttachmentActivity.start(this, getDestFIle().getAbsolutePath());
         break;
       case R.id.tv5:
         QbSdk.openFileReader(
@@ -84,5 +112,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     android.os.Process.killProcess(android.os.Process.myPid());
     // 退出JVM(java虚拟机),释放所占内存资源,0表示正常退出(非0的都为异常退出)
     System.exit(0);
+  }
+
+  private void loadInfo() {
+    StringBuilder sb = new StringBuilder();
+    boolean x5DisabledSync = QbSdk.isX5DisabledSync(this);
+    if (x5DisabledSync) {
+      sb.append("X5内核已禁用");
+    } else {
+      boolean tbsInstalling = QbSdk.getTBSInstalling();
+      if (tbsInstalling) {
+        sb.append("X5内核正在安装");
+      }
+    }
+
+    tvInfo.setText(sb.toString());
+  }
+
+  private File getDestFIle() {
+    return new File(ContextCompat.getDataDir(this), "test.docx");
   }
 }
