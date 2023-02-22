@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         in.close();
         out.close();
+        Log.i("QbSdk", "复制成功");
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

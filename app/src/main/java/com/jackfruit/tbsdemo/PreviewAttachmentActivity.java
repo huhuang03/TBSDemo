@@ -39,6 +39,7 @@ public class PreviewAttachmentActivity extends AppCompatActivity {
     setContentView(R.layout.activity_preview_attachment);
     initView();
     String fileUrl = getIntent().getStringExtra("fileUrl");
+    Log.i("QbSdk", "fileUrl: " + fileUrl);
     mFile = new File(fileUrl);
     addTbsReaderView();
   }
@@ -64,6 +65,8 @@ public class PreviewAttachmentActivity extends AppCompatActivity {
     boolean result = mTbsReaderView.preOpen(extensionName, false);
     if (result) {
       mTbsReaderView.openFile(bundle);
+    } else {
+      Log.w("QbSdk", "not support " + mFile.getPath());
     }
   }
 
@@ -71,7 +74,7 @@ public class PreviewAttachmentActivity extends AppCompatActivity {
   public void onConfigurationChanged(Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     int rot = getWindowManager().getDefaultDisplay().getRotation();
-    Log.d("TAG", "onConfigurationChanged : " + newConfig + ", rot : " + rot);
+    Log.d("QbSdk", "onConfigurationChanged : " + newConfig + ", rot : " + rot);
     if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
       mFlRoot.post(
           () -> {
